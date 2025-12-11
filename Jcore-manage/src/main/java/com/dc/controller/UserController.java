@@ -1,11 +1,16 @@
 package com.dc.controller;
 
+import com.dc.dto.LoginRequest;
+import com.dc.dto.UserRequest;
 import com.dc.entity.User;
 import com.dc.result.ResultVo;
 import com.dc.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+
 
 @Slf4j
 @RestController
@@ -19,11 +24,11 @@ public class UserController {
      * 用户注册
      */
     @PostMapping("/register")
-    public ResultVo register(@RequestParam String username,
-                           @RequestParam String password,
-                           @RequestParam String email) {
+    public ResultVo register(@Valid @RequestBody UserRequest userRequest) {
         try {
-            boolean result = userService.register(username, password, email);
+            boolean result = userService.register(userRequest.getUsername(),
+                                                userRequest.getPassword(),
+                                                userRequest.getEmail());
             if (result) {
                 return ResultVo.success("注册成功");
             } else {
@@ -39,10 +44,10 @@ public class UserController {
      * 用户登录
      */
     @PostMapping("/login")
-    public ResultVo login(@RequestParam String username,
-                         @RequestParam String password) {
+    public ResultVo login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            String token = userService.login(username, password);
+            String token = userService.login(loginRequest.getUsername(),
+                                           loginRequest.getPassword());
             if (token != null) {
                 return ResultVo.success("登录成功", token);
             } else {
