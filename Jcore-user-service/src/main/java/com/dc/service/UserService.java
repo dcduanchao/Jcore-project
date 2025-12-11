@@ -16,6 +16,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+    
 
     private final UserMapper userMapper;
     private final RedisUtil redisUtil;
