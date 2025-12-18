@@ -2,7 +2,9 @@ package com.dc.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.dc.entity.User;
+import com.dc.mapper.RoleMapper;
 import com.dc.mapper.UserMapper;
+import com.dc.auth.JwtUtil;
 import com.dc.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +12,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -19,6 +22,8 @@ public class UserService {
 
 
     private final UserMapper userMapper;
+    private final RoleMapper roleMapper;
+    private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -73,12 +78,14 @@ public class UserService {
                 return null;
             }
 
-            // 生成token并存储到Redis
-            String token = UUID.randomUUID().toString();
-            String tokenKey = "user:token:" + token;
-            redisUtil.set(tokenKey, user.getId().toString(), 3600); // 1小时过期
+            // 获取用户角色信息 - 需要从user_role表查询，这里暂时使用默认角色
+            List<String> roles = Arrays.asList("user"); // 默认角色
+            // TODO: 实现从user_role表查询用户角色的逻辑
 
-            log.info("用户登录成功: {}", username);
+            // 生成JWT token
+            String token = jwtUtil.generateToken(user.getId(), username, roles);
+
+            log.info("用户登录成功: username={}, roles={}", username, roles);
             return token;
         } catch (Exception e) {
             log.error("登录失败", e);
@@ -91,13 +98,12 @@ public class UserService {
      */
     public User getUserByToken(String token) {
         try {
-            String tokenKey = "user:token:" + token;
-            Object userIdObj = redisUtil.get(tokenKey);
-            if (userIdObj == null) {
+            // 从JWT中解析用户ID
+            Long userId = jwtUtil.getUserIdFromToken(token);
+            if (userId == null) {
                 return null;
             }
 
-            Long userId = Long.parseLong(userIdObj.toString());
             return userMapper.selectById(userId);
         } catch (Exception e) {
             log.error("获取用户信息失败", e);

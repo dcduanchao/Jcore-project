@@ -54,18 +54,6 @@ CREATE TABLE IF NOT EXISTS `menu` (
     KEY `idx_sort_order` (`sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='菜单表';
 
--- 创建用户角色关联表
-CREATE TABLE IF NOT EXISTS `user_role` (
-    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-    `user_id` bigint NOT NULL COMMENT '用户ID',
-    `role_id` bigint NOT NULL COMMENT '角色ID',
-    `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_user_role` (`user_id`, `role_id`),
-    KEY `idx_user_id` (`user_id`),
-    KEY `idx_role_id` (`role_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户角色关联表';
-
 -- 创建角色权限关联表
 CREATE TABLE IF NOT EXISTS `role_permission` (
     `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
@@ -78,6 +66,18 @@ CREATE TABLE IF NOT EXISTS `role_permission` (
     KEY `idx_permission_id` (`permission_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色权限关联表';
 
+-- 创建用户角色关联表
+CREATE TABLE IF NOT EXISTS `user_role` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `user_id` bigint NOT NULL COMMENT '用户ID',
+    `role_id` bigint NOT NULL COMMENT '角色ID',
+    `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_user_role` (`user_id`, `role_id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_role_id` (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户角色关联表';
+
 -- 创建角色菜单关联表
 CREATE TABLE IF NOT EXISTS `role_menu` (
     `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
@@ -89,21 +89,3 @@ CREATE TABLE IF NOT EXISTS `role_menu` (
     KEY `idx_role_id` (`role_id`),
     KEY `idx_menu_id` (`menu_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色菜单关联表';
-
--- 插入默认数据
--- 默认角色
-INSERT INTO `role` (`name`, `description`) VALUES ('admin', '管理员') ON DUPLICATE KEY UPDATE `description` = '管理员';
-INSERT INTO `role` (`name`, `description`) VALUES ('user', '普通用户') ON DUPLICATE KEY UPDATE `description` = '普通用户';
-
--- 默认权限
-INSERT INTO `permission` (`name`, `code`, `description`) VALUES ('用户管理', 'user:manage', '用户管理权限') ON DUPLICATE KEY UPDATE `description` = '用户管理权限';
-INSERT INTO `permission` (`name`, `code`, `description`) VALUES ('角色管理', 'role:manage', '角色管理权限') ON DUPLICATE KEY UPDATE `description` = '角色管理权限';
-INSERT INTO `permission` (`name`, `code`, `description`) VALUES ('权限管理', 'permission:manage', '权限管理权限') ON DUPLICATE KEY UPDATE `description` = '权限管理权限';
-INSERT INTO `permission` (`name`, `code`, `description`) VALUES ('菜单管理', 'menu:manage', '菜单管理权限') ON DUPLICATE KEY UPDATE `description` = '菜单管理权限';
-
--- 默认菜单
-INSERT INTO `menu` (`name`, `path`, `icon`, `parent_id`, `sort_order`) VALUES ('系统管理', '/system', 'system', NULL, 1) ON DUPLICATE KEY UPDATE `path` = '/system';
-INSERT INTO `menu` (`name`, `path`, `icon`, `parent_id`, `sort_order`) VALUES ('用户管理', '/system/user', 'user', 1, 1) ON DUPLICATE KEY UPDATE `path` = '/system/user';
-INSERT INTO `menu` (`name`, `path`, `icon`, `parent_id`, `sort_order`) VALUES ('角色管理', '/system/role', 'role', 1, 2) ON DUPLICATE KEY UPDATE `path` = '/system/role';
-INSERT INTO `menu` (`name`, `path`, `icon`, `parent_id`, `sort_order`) VALUES ('权限管理', '/system/permission', 'permission', 1, 3) ON DUPLICATE KEY UPDATE `path` = '/system/permission';
-INSERT INTO `menu` (`name`, `path`, `icon`, `parent_id`, `sort_order`) VALUES ('菜单管理', '/system/menu', 'menu', 1, 4) ON DUPLICATE KEY UPDATE `path` = '/system/menu';
