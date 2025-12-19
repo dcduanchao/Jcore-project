@@ -3,15 +3,13 @@ package com.dc.dto;
 import lombok.Data;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 
 /**
- * 用户请求DTO
+ * 用户更新请求DTO
  */
 @Data
-public class UserRequest {
+public class UserUpdateRequest {
 
-    @NotBlank(message = "用户名不能为空")
     private String username;
 
     private String password;

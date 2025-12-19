@@ -1,5 +1,7 @@
 package com.dc.auth;
 
+import java.util.List;
+
 /**
  * 用户会话上下文，使用ThreadLocal存储当前用户信息
  */
@@ -40,18 +42,12 @@ public class UserSessionContext {
     /**
      * 获取当前用户角色列表
      */
-    public static java.util.List<String> getCurrentRoles() {
+    public static List<Long> getCurrentRoles() {
         UserSession userSession = getUserSession();
         return userSession != null ? userSession.getRoles() : null;
     }
 
-    /**
-     * 获取当前用户主要角色（第一个角色）
-     */
-    public static String getCurrentRole() {
-        java.util.List<String> roles = getCurrentRoles();
-        return roles != null && !roles.isEmpty() ? roles.get(0) : null;
-    }
+
 
     /**
      * 清理当前用户会话

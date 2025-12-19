@@ -25,7 +25,7 @@ public class RoleController {
     private final RoleMapper roleMapper;
 
     /**
-     * 获取角色列表（分页）
+     * 获取角色列表（分页，不显示超级管理员角色）
      */
     @GetMapping("/list")
     @RequiresPermission("role:manage")
@@ -33,7 +33,12 @@ public class RoleController {
                                @RequestParam(defaultValue = "10") Integer size) {
         try {
             Page<Role> page = new Page<>(current, size);
-            Page<Role> result = roleMapper.selectPage(page, null);
+            // 排除超级管理员角色（id = 1）
+            QueryWrapper<Role> queryWrapper = new QueryWrapper<>();
+            queryWrapper.ne("id", 1);
+            queryWrapper.orderByDesc("create_time");
+
+            Page<Role> result = roleMapper.selectPage(page, queryWrapper);
             return ResultVo.success("获取成功", result);
         } catch (Exception e) {
             log.error("获取角色列表失败", e);
@@ -42,12 +47,17 @@ public class RoleController {
     }
 
     /**
-     * 获取所有角色
+     * 获取所有角色（不包括超级管理员角色）
      */
     @GetMapping("/all")
     public ResultVo getAllRoles() {
         try {
-            List<Role> roles = roleMapper.selectList(null);
+            // 排除超级管理员角色（id = 1）
+            QueryWrapper<Role> queryWrapper = new QueryWrapper<>();
+            queryWrapper.ne("id", 1);
+            queryWrapper.orderByDesc("create_time");
+
+            List<Role> roles = roleMapper.selectList(queryWrapper);
             return ResultVo.success("获取成功", roles);
         } catch (Exception e) {
             log.error("获取所有角色失败", e);
@@ -110,6 +120,11 @@ public class RoleController {
     @RequiresPermission("role:manage")
     public ResultVo updateRole(@PathVariable Long id, @RequestBody Role role) {
         try {
+            // 防止修改超级管理员角色
+            if (id == 1) {
+                return ResultVo.error("不能修改超级管理员角色");
+            }
+
             Role existingRole = roleMapper.selectById(id);
             if (existingRole == null) {
                 return ResultVo.error("角色不存在");
@@ -144,6 +159,11 @@ public class RoleController {
     @RequiresPermission("role:manage")
     public ResultVo deleteRole(@PathVariable Long id) {
         try {
+            // 防止删除超级管理员角色
+            if (id == 1) {
+                return ResultVo.error("不能删除超级管理员角色");
+            }
+
             Role role = roleMapper.selectById(id);
             if (role == null) {
                 return ResultVo.error("角色不存在");

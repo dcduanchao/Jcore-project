@@ -1,10 +1,12 @@
 package com.dc.util;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 /**
  * 日期工具类
@@ -14,6 +16,7 @@ public class DateUtil {
     public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
+    public static final String DEFAULT_DATE_FORMAT_1 = "yyyy/MM/dd";
 
     /**
      * 获取当前日期时间字符串
@@ -148,5 +151,12 @@ public class DateUtil {
      */
     public static LocalDate getDaysLater(int days) {
         return LocalDate.now().plusDays(days);
+    }
+
+    public static String dateFormat(Date date, String format) {
+
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        String formattedDate = sdf.format(date);
+        return formattedDate;
     }
 }

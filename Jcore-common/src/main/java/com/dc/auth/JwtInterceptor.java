@@ -29,14 +29,21 @@ public class JwtInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String requestURI = request.getRequestURI();
+        String method = request.getMethod();
+        log.info("请求: {} {}", method, requestURI);
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
 
         // 跳过登录和注册接口
         if (requestURI.contains("/user/login") || requestURI.contains("/user/register")) {
             return true;
         }
-
+//        request.getHeaderNames().asIterator().forEachRemaining(headerName -> {
+//            log.info("请求头: {}={}", headerName, request.getHeader(headerName));
+//        });
         // 从请求头获取token
-        String token = request.getHeader("Authorization");
+        String token = request.getHeader("authorization");
         if (token == null || token.isEmpty()) {
             log.warn("请求缺少Authorization头: {}", requestURI);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -61,10 +68,11 @@ public class JwtInterceptor implements HandlerInterceptor {
         try {
             Long userId = jwtUtil.getUserIdFromToken(token);
             String username = jwtUtil.getUsernameFromToken(token);
-            List<String> roles = jwtUtil.getRolesFromToken(token);
+            List<Long> roles = jwtUtil.getRolesFromToken(token);
+            List<String> pCode = jwtUtil.getPremisssion(token);
 
             // 创建用户会话并设置到ThreadLocal
-            UserSession userSession = new UserSession(userId, username, roles);
+            UserSession userSession = new UserSession(userId, username, roles,pCode);
             UserSessionContext.setUserSession(userSession);
 
             log.debug("用户认证成功: username={}, roles={}", username, roles);

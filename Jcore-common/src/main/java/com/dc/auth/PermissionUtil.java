@@ -3,6 +3,8 @@ package com.dc.auth;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * 权限校验工具类
  */
@@ -21,14 +23,14 @@ public class PermissionUtil {
                 return false;
             }
 
-            var roles = userSession.getRoles();
+            List<Long> roles = userSession.getRoles();
             if (roles == null || roles.isEmpty()) {
                 log.warn("用户角色为空");
                 return false;
             }
 
             // 管理员拥有所有权限
-            if (roles.contains("admin")) {
+            if (roles.contains(1L)) {
                 return true;
             }
 
@@ -37,9 +39,16 @@ public class PermissionUtil {
             // 例如：user角色只能访问user:*权限，admin可以访问所有权限
 
             // 简单的权限匹配逻辑（可根据实际需求扩展）
-            if (roles.contains("user") && permissionCode.startsWith("user:")) {
+
+            List<String> permissions = userSession.getPermissions();
+            if(permissions.contains(permissionCode)){
                 return true;
             }
+
+//
+//            if (roles.contains("user") && roles.startsWith("user:")) {
+//                return true;
+//            }
 
             log.warn("用户{}没有权限{}，角色：{}", userSession.getUsername(), permissionCode, roles);
             return false;

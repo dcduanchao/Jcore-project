@@ -30,5 +30,7 @@ public class UserSession implements Serializable {
     /**
      * 角色列表（多个角色）
      */
-    private List<String> roles;
+    private List<Long> roles;
+
+    private List<String> permissions;
 }

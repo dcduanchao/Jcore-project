@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * JWT工具类
@@ -34,15 +35,18 @@ public class JwtUtil {
      *
      * @param userId 用户ID
      * @param username 用户名
-     * @param roles 角色
+     * @param roles 角色名称列表
      * @return JWT token
      */
-    public String generateToken(Long userId, String username, List<String> roles) {
+    public String generateToken(Long userId, String username, List<Long> roles,  List<String> permissions) {
         try {
             Date now = new Date();
             Date expiration = new Date(now.getTime() + jwtProperties.getExpirationTime());
 
-            String token = Jwts.builder().claim("role", roles).claim("userId", userId)
+            String token = Jwts.builder()
+                    .claim("role", roles)
+                    .claim("userId", userId)
+                    .claim("pCode",permissions)
                     .subject(username)
                     .issuer(jwtProperties.getIssuer()).expiration(expiration)
                     .issuedAt(now).signWith(getSigningKey())
@@ -132,35 +136,37 @@ public class JwtUtil {
      * 从JWT token中获取角色列表
      *
      * @param token JWT token
-     * @return 角色列表
+     * @return 角色名称列表
      */
     @SuppressWarnings("unchecked")
-    public List<String> getRolesFromToken(String token) {
+    public List<Long> getRolesFromToken(String token) {
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-            return claims.get("role", List.class);
+            List role = claims.get("role", List.class);
+            List<Long> rolesList = (List<Long>) role.stream()
+                    .map(p->Long.valueOf(p.toString())).collect(Collectors.toList());
+            return rolesList;
         } catch (Exception e) {
             log.error("从JWT token中获取角色列表失败", e);
             return null;
         }
     }
 
-    /**
-     * 从JWT token中获取角色（向后兼容，返回第一个角色）
-     *
-     * @param token JWT token
-     * @return 角色
-     */
-    public String getRoleFromToken(String token) {
+    @SuppressWarnings("unchecked")
+    public List<String> getPremisssion(String token) {
         try {
-            List<String> roles = getRolesFromToken(token);
-            return roles != null && !roles.isEmpty() ? roles.get(0) : null;
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return claims.get("pCode", List.class);
         } catch (Exception e) {
-            log.error("从JWT token中获取角色失败", e);
+            log.error("从JWT token中获取角色列表失败", e);
             return null;
         }
     }

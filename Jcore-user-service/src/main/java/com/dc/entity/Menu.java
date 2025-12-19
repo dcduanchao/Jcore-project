@@ -1,6 +1,7 @@
 package com.dc.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -30,5 +31,6 @@ public class Menu {
     private LocalDateTime updateTime;
 
     // 非数据库字段，用于树形结构
+    @TableField(exist = false)
     private List<Menu> children;
 }
